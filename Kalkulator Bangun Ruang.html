@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kalkulator Bangun Ruang</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#eff1f5;--card:#e6e9ef;--input:#ccd0da;--text:#4c4f69;--muted:#6c6f85;
+  --ungu:#8839ef;--merah:#d20f39;--hijau:#40a02b;--biru:#04a5e5;--oranye:#fe640b;--on-accent:#ffffff;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1e1e2e;--card:#313244;--input:#45475a;--text:#cdd6f4;--muted:#a6adc8;
+    --ungu:#cba6f7;--merah:#f38ba8;--hijau:#a6e3a1;--biru:#89dceb;--oranye:#fab387;--on-accent:#1e1e2e;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1e1e2e;--card:#313244;--input:#45475a;--text:#cdd6f4;--muted:#a6adc8;
+  --ungu:#cba6f7;--merah:#f38ba8;--hijau:#a6e3a1;--biru:#89dceb;--oranye:#fab387;--on-accent:#1e1e2e;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:24px 16px}
+main{width:100%;max-width:420px}
+h1{font-size:1.4rem;color:var(--ungu);text-align:center;margin:12px 0 6px}
+h2{font-size:1.2rem;color:var(--ungu);text-align:center;margin:12px 0 16px}
+p.sub{text-align:center;margin:0 0 20px}
+.menu{display:grid;gap:12px}
+button{font:inherit;cursor:pointer;border:0;border-radius:6px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--ungu);outline-offset:2px}
+.pilih{background:var(--card);color:var(--text);font-weight:700;padding:14px;font-size:1rem}
+.pilih:hover{background:var(--ungu);color:var(--on-accent)}
+.kartu{background:var(--card);padding:16px 20px;border-radius:8px}
+.baris{display:flex;align-items:center;gap:10px;margin:8px 0}
+.baris label{width:42%}
+.baris input{flex:1;min-width:0;background:var(--input);color:var(--text);border:0;border-radius:4px;padding:9px 10px;font:inherit}
+.catatan{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+.aksi{display:flex;justify-content:center;gap:12px;margin:16px 0 6px}
+.aksi button{padding:10px 22px;font-weight:700;color:var(--on-accent)}
+.hitung{background:var(--ungu)}.reset{background:var(--merah)}
+.kembali{display:block;margin:6px auto 16px;background:none;color:var(--muted);text-decoration:underline;font-size:.9rem}
+.hasil{text-align:center;font-weight:700;margin:6px 0;min-height:1.4em}
+.error{text-align:center;color:var(--merah);min-height:1.4em;margin:10px 0 0;font-size:.95rem}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <section id="menu">
+    <h1>Kalkulator Bangun Ruang</h1>
+    <p class="sub">Pilih bangun ruang yang ingin dihitung:</p>
+    <div class="menu" id="daftar"></div>
+  </section>
+  <section id="halaman" hidden>
+    <h2 id="judul"></h2>
+    <div class="kartu" id="form"></div>
+    <p class="error" id="error" role="alert"></p>
+    <div class="aksi">
+      <button class="hitung" id="btnHitung" type="button">Hitung</button>
+      <button class="reset" id="btnReset" type="button">Reset</button>
+    </div>
+    <div id="hasil"></div>
+    <button class="kembali" id="btnKembali" type="button">&lsaquo; Kembali ke menu</button>
+  </section>
+</main>
+<script>
+var PI = Math.PI;
+var BANGUN = {
+  balok:{nama:"Balok",f:[["p","Panjang (p):"],["l","Lebar (l):"],["t","Tinggi (t):"]],
+    hit:function(v){return [["Volume",v.p*v.l*v.t,"³","var(--hijau)"],["Luas Permukaan",2*(v.p*v.l+v.p*v.t+v.l*v.t),"²","var(--biru)"]];}},
+  bola:{nama:"Bola",f:[["r","Jari-jari (r):"]],
+    hit:function(v){return [["Volume",(4/3)*PI*Math.pow(v.r,3),"³","var(--hijau)"],["Luas Permukaan",4*PI*v.r*v.r,"²","var(--biru)"]];}},
+  kerucut:{nama:"Kerucut",f:[["r","Jari-jari (r):"],["t","Tinggi (t):"]],
+    hit:function(v){var s=Math.sqrt(v.r*v.r+v.t*v.t);
+      return [["Garis Pelukis (s)",s,"","var(--oranye)"],["Volume",PI*v.r*v.r*v.t/3,"³","var(--hijau)"],["Luas Permukaan",PI*v.r*(v.r+s),"²","var(--biru)"]];}},
+  prisma:{nama:"Prisma Segitiga",f:[["a","Sisi a:"],["b","Sisi b:"],["c","Sisi c:"],["t","Tinggi (t):"]],
+    catatan:"* a, b, c = sisi-sisi segitiga alas",
+    cek:function(v){return (v.a+v.b<=v.c||v.a+v.c<=v.b||v.b+v.c<=v.a)?"Sisi a, b, c tidak bisa membentuk segitiga!":null;},
+    hit:function(v){var s=(v.a+v.b+v.c)/2,la=Math.sqrt(s*(s-v.a)*(s-v.b)*(s-v.c));
+      return [["Luas Alas",la,"²","var(--oranye)"],["Volume",la*v.t,"³","var(--hijau)"],["Luas Permukaan",2*la+(v.a+v.b+v.c)*v.t,"²","var(--biru)"]];}},
+  tabung:{nama:"Tabung",f:[["r","Jari-jari (r):"],["t","Tinggi (t):"]],
+    hit:function(v){return [["Volume",PI*v.r*v.r*v.t,"³","var(--hijau)"],["Luas Permukaan",2*PI*v.r*(v.r+v.t),"²","var(--biru)"]];}}
+};
+var $ = function(id){return document.getElementById(id);};
+var aktif = null;
+
+Object.keys(BANGUN).forEach(function(k){
+  var b = document.createElement("button");
+  b.className = "pilih"; b.type = "button"; b.textContent = BANGUN[k].nama;
+  b.onclick = function(){buka(k);};
+  $("daftar").appendChild(b);
+});
+
+function buka(k){
+  aktif = BANGUN[k];
+  $("judul").textContent = "Kalkulator " + aktif.nama;
+  var h = "";
+  aktif.f.forEach(function(f){
+    h += '<div class="baris"><label for="in_'+f[0]+'">'+f[1]+'</label><input id="in_'+f[0]+'" type="number" inputmode="decimal" step="any" min="0"></div>';
+  });
+  if (aktif.catatan) h += '<p class="catatan">'+aktif.catatan+'</p>';
+  $("form").innerHTML = h;
+  reset(true);
+  $("menu").hidden = true; $("halaman").hidden = false;
+  var first = $("form").querySelector("input"); if (first) first.focus();
+}
+
+function reset(skipFocus){
+  $("form").querySelectorAll("input").forEach(function(i){i.value="";});
+  $("error").textContent = "";
+  var h = "";
+  aktif.hit({p:1,l:1,t:1,r:1,a:1,b:1,c:1}).forEach(function(r){
+    h += '<p class="hasil" style="color:'+r[3]+'">'+r[0]+': -</p>';
+  });
+  $("hasil").innerHTML = h;
+  if (skipFocus !== true){var f=$("form").querySelector("input"); if (f) f.focus();}
+}
+
+function hitung(){
+  var v = {};
+  for (var i=0;i<aktif.f.length;i++){
+    var key = aktif.f[i][0], raw = $("in_"+key).value.trim();
+    var n = parseFloat(raw);
+    if (raw === "" || isNaN(n)) return galat("Masukkan angka yang valid!");
+    v[key] = n;
+  }
+  for (var k in v){ if (v[k] <= 0) return galat("Nilai harus lebih dari 0!"); }
+  if (aktif.cek){var m = aktif.cek(v); if (m) return galat(m);}
+  $("error").textContent = "";
+  var h = "";
+  aktif.hit(v).forEach(function(r){
+    var teks = r[1].toLocaleString("id-ID",{minimumFractionDigits:2,maximumFractionDigits:2});
+    var sat = r[2] ? " satuan"+r[2] : "";
+    h += '<p class="hasil" style="color:'+r[3]+'">'+r[0]+': '+teks+sat+'</p>';
+  });
+  $("hasil").innerHTML = h;
+}
+function galat(m){$("error").textContent = m;}
+
+$("btnHitung").onclick = hitung;
+$("btnReset").onclick = function(){reset();};
+$("btnKembali").onclick = function(){$("halaman").hidden = true; $("menu").hidden = false;};
+$("halaman").addEventListener("keydown", function(e){if (e.key === "Enter") hitung();});
+</script>
+</body>
+</html>
