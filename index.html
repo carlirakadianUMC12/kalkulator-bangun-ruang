@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalkulator Bangun Ruang</title>
+<style>
+:root{color-scheme:dark;--bg:#1e1e2e;--card:#313244;--input:#45475a;--text:#cdd6f4;--ungu:#cba6f7;--pink:#f38ba8;--hijau:#a6e3a1;--cyan:#89dceb;--oranye:#fab387;--abu:#9399b2}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:24px 16px}
+main{width:100%;max-width:420px}
+h1{font-size:1.4rem;color:var(--ungu);text-align:center;margin:28px 0 6px}
+h2{font-size:1.2rem;color:var(--ungu);text-align:center;margin:20px 0 14px}
+p.sub{text-align:center;margin:0 0 20px}
+.kartu{background:var(--card);border-radius:10px;padding:16px 18px}
+.baris{display:flex;align-items:center;gap:8px;margin:8px 0}
+.baris label{width:110px;flex:none;font-size:.9rem}
+input[type=text],input[type=password]{flex:1;min-width:0;background:var(--input);color:var(--text);border:2px solid transparent;border-radius:6px;padding:9px 10px;font-size:1rem}
+input:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.cek{display:flex;gap:6px;align-items:center;font-size:.85rem;margin-top:8px}
+.catatan{color:var(--abu);font-size:.8rem;margin:8px 0 0}
+button{font:inherit;cursor:pointer;border:0;border-radius:6px}
+.utama{background:var(--ungu);color:var(--bg);font-weight:700;padding:10px 26px}
+.bahaya{background:var(--pink);color:var(--bg);font-weight:700;padding:10px 22px}
+.tautan{background:none;color:var(--cyan);text-decoration:underline;font-size:.9rem;padding:6px}
+.tautan.abu{color:var(--abu)}
+.menu button{display:block;width:100%;background:var(--card);color:var(--text);font-weight:700;padding:13px;margin:8px 0}
+.menu button:hover{background:var(--ungu);color:var(--bg)}
+.tengah{text-align:center;margin-top:16px}
+.aksi{display:flex;justify-content:center;gap:12px;margin:18px 0 8px}
+.status{color:var(--pink);text-align:center;font-size:.9rem;min-height:1.3em;margin-top:12px}
+.hasil{text-align:center;font-weight:700;margin:4px 0}
+.hasil.v{color:var(--hijau)}.hasil.l{color:var(--cyan)}.hasil.o{color:var(--oranye);font-weight:400}
+.salam{color:var(--oranye);text-align:center;font-size:.9rem;margin:0 0 16px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+
+<section id="v-login">
+  <h1>Kalkulator Bangun Ruang</h1>
+  <p class="sub">Silakan login untuk melanjutkan</p>
+  <form class="kartu" id="f-login" autocomplete="off">
+    <div class="baris"><label for="l-user">Username</label><input type="text" id="l-user" autocapitalize="none"></div>
+    <div class="baris"><label for="l-pass">Password</label><input type="password" id="l-pass"></div>
+    <label class="cek"><input type="checkbox" id="l-lihat"> Tampilkan password</label>
+  </form>
+  <div class="tengah"><button class="utama" id="b-login">Login</button></div>
+  <div class="status" id="s-login" role="alert"></div>
+  <div class="tengah" style="margin-top:4px"><button class="tautan" id="b-ke-daftar">Belum punya akun? Daftar di sini</button></div>
+</section>
+
+<section id="v-daftar" hidden>
+  <h2>Buat akun baru</h2>
+  <form class="kartu" id="f-daftar" autocomplete="off">
+    <div class="baris"><label for="d-user">Username</label><input type="text" id="d-user" autocapitalize="none"></div>
+    <div class="baris"><label for="d-pass">Password</label><input type="password" id="d-pass"></div>
+    <div class="baris"><label for="d-ulang">Konfirmasi</label><input type="password" id="d-ulang"></div>
+    <label class="cek"><input type="checkbox" id="d-lihat"> Tampilkan password</label>
+    <p class="catatan">Username minimal 3 karakter, password minimal 6 karakter.</p>
+  </form>
+  <div class="tengah" style="margin-top:18px"><button class="utama" id="b-daftar">Daftar</button></div>
+  <div class="status" id="s-daftar" role="alert"></div>
+  <div class="tengah"><button class="tautan abu" id="b-ke-login">&lt; Kembali ke login</button></div>
+</section>
+
+<section id="v-menu" hidden>
+  <h1>Kalkulator Bangun Ruang</h1>
+  <p class="salam" id="salam"></p>
+  <p class="sub">Pilih bangun ruang yang ingin dihitung:</p>
+  <div class="menu" id="daftar-menu"></div>
+  <div class="tengah"><button class="bahaya" id="b-logout">Logout</button></div>
+</section>
+
+<section id="v-hitung" hidden>
+  <h2 id="j-hitung"></h2>
+  <form class="kartu" id="f-hitung" autocomplete="off"></form>
+  <div class="aksi">
+    <button class="utama" id="b-hitung">Hitung</button>
+    <button class="bahaya" id="b-reset">Reset</button>
+  </div>
+  <div class="status" id="s-hitung" role="alert"></div>
+  <div id="hasil"></div>
+  <div class="tengah"><button class="tautan abu" id="b-ke-menu">&lt; Kembali ke menu</button></div>
+</section>
+
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const PI = Math.PI;
+const fmt = n => n.toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+/* ---------- Daftar bangun ruang ---------- */
+const BANGUN = {
+  balok: {nama: "Balok", kolom: [["p", "Panjang (p)"], ["l", "Lebar (l)"], ["t", "Tinggi (t)"]],
+    hitung: ({p, l, t}) => [["Volume", p * l * t, "satuan³", "v"],
+                            ["Luas permukaan", 2 * (p * l + p * t + l * t), "satuan²", "l"]]},
+  bola: {nama: "Bola", kolom: [["r", "Jari-jari (r)"]],
+    hitung: ({r}) => [["Volume", 4 / 3 * PI * r ** 3, "satuan³", "v"],
+                      ["Luas permukaan", 4 * PI * r ** 2, "satuan²", "l"]]},
+  kerucut: {nama: "Kerucut", kolom: [["r", "Jari-jari (r)"], ["t", "Tinggi (t)"]],
+    hitung: ({r, t}) => { const s = Math.sqrt(r * r + t * t);
+      return [["Garis pelukis (s)", s, "", "o"],
+              ["Volume", PI * r * r * t / 3, "satuan³", "v"],
+              ["Luas permukaan", PI * r * (r + s), "satuan²", "l"]]; }},
+  prisma: {nama: "Prisma segitiga", kolom: [["a", "Sisi a"], ["b", "Sisi b"], ["c", "Sisi c"], ["t", "Tinggi (t)"]],
+    catatan: "a, b, c adalah sisi-sisi segitiga alas.",
+    hitung: ({a, b, c, t}) => {
+      if (a + b <= c || a + c <= b || b + c <= a) throw new Error("Sisi a, b, c tidak bisa membentuk segitiga!");
+      const s = (a + b + c) / 2, alas = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+      return [["Luas alas", alas, "satuan²", "o"],
+              ["Volume", alas * t, "satuan³", "v"],
+              ["Luas permukaan", 2 * alas + (a + b + c) * t, "satuan²", "l"]]; }},
+  tabung: {nama: "Tabung", kolom: [["r", "Jari-jari (r)"], ["t", "Tinggi (t)"]],
+    hitung: ({r, t}) => [["Volume", PI * r * r * t, "satuan³", "v"],
+                         ["Luas permukaan", 2 * PI * r * (r + t), "satuan²", "l"]]}
+};
+
+/* ---------- Penyimpanan akun (di browser) ---------- */
+let cadangan = {};
+function muatUsers() {
+  try { return JSON.parse(localStorage.getItem("rpl_users") || "{}"); }
+  catch (e) { return cadangan; }
+}
+function simpanUsers(u) {
+  cadangan = u;
+  try { localStorage.setItem("rpl_users", JSON.stringify(u)); } catch (e) {}
+}
+const toHex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+const fromHex = h => new Uint8Array(h.match(/../g).map(x => parseInt(x, 16)));
+async function hashPw(pw, salt) {
+  const kunci = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256"}, kunci, 256);
+  return toHex(bits);
+}
+
+/* ---------- Navigasi ---------- */
+const HALAMAN = ["login", "daftar", "menu", "hitung"];
+function tampil(n) { HALAMAN.forEach(h => $("v-" + h).hidden = h !== n); }
+function lihatPassword(cekId, ...inputIds) {
+  $(cekId).addEventListener("change", e => inputIds.forEach(i => $(i).type = e.target.checked ? "text" : "password"));
+}
+lihatPassword("l-lihat", "l-pass");
+lihatPassword("d-lihat", "d-pass", "d-ulang");
+document.querySelectorAll("form").forEach(f => f.addEventListener("submit", e => e.preventDefault()));
+
+/* ---------- Login ---------- */
+let gagal = 0, terkunciSampai = 0, userAktif = null;
+async function prosesLogin() {
+  const st = $("s-login");
+  const sisaKunci = Math.ceil((terkunciSampai - Date.now()) / 1000);
+  if (sisaKunci > 0) { st.textContent = `Terlalu banyak percobaan. Coba lagi dalam ${sisaKunci} detik.`; return; }
+  const user = $("l-user").value.trim().toLowerCase(), pw = $("l-pass").value;
+  if (!user || !pw) { st.textContent = "Username dan password harus diisi!"; return; }
+  const data = muatUsers()[user];
+  let ok = false;
+  if (data) ok = (await hashPw(pw, fromHex(data.salt))) === data.hash;
+  if (ok) {
+    gagal = 0; userAktif = user;
+    $("l-user").value = ""; $("l-pass").value = ""; st.textContent = "";
+    $("salam").textContent = `Halo, ${user}!`;
+    tampil("menu");
+  } else {
+    gagal++; $("l-pass").value = "";
+    if (gagal >= 3) { gagal = 0; terkunciSampai = Date.now() + 30000;
+      st.textContent = "Terlalu banyak percobaan gagal. Coba lagi dalam 30 detik."; }
+    else st.textContent = `Username atau password salah! Sisa percobaan: ${3 - gagal}`;
+  }
+}
+$("b-login").addEventListener("click", prosesLogin);
+$("f-login").addEventListener("keydown", e => { if (e.key === "Enter") prosesLogin(); });
+$("b-ke-daftar").addEventListener("click", () => { $("s-login").textContent = ""; tampil("daftar"); });
+
+/* ---------- Daftar ---------- */
+async function prosesDaftar() {
+  const st = $("s-daftar");
+  const user = $("d-user").value.trim().toLowerCase(), pw = $("d-pass").value, ulang = $("d-ulang").value;
+  if (!user || !pw || !ulang) { st.textContent = "Semua kolom harus diisi!"; return; }
+  if (user.length < 3 || /\s/.test(user)) { st.textContent = "Username minimal 3 karakter dan tanpa spasi!"; return; }
+  if (pw.length < 6) { st.textContent = "Password minimal 6 karakter!"; return; }
+  if (pw !== ulang) { st.textContent = "Konfirmasi password tidak sama!"; return; }
+  const users = muatUsers();
+  if (users[user]) { st.textContent = "Username sudah dipakai!"; return; }
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  users[user] = {salt: toHex(salt), hash: await hashPw(pw, salt)};
+  simpanUsers(users);
+  ["d-user", "d-pass", "d-ulang"].forEach(i => $(i).value = "");
+  st.textContent = "";
+  $("l-user").value = user; $("l-pass").value = "";
+  $("s-login").textContent = `Akun “${user}” berhasil dibuat. Silakan login.`;
+  tampil("login"); $("l-pass").focus();
+}
+$("b-daftar").addEventListener("click", prosesDaftar);
+$("f-daftar").addEventListener("keydown", e => { if (e.key === "Enter") prosesDaftar(); });
+$("b-ke-login").addEventListener("click", () => { $("s-daftar").textContent = ""; tampil("login"); });
+
+/* ---------- Menu & kalkulator ---------- */
+let aktif = null;
+Object.entries(BANGUN).forEach(([kode, b]) => {
+  const tombol = document.createElement("button");
+  tombol.textContent = b.nama;
+  tombol.addEventListener("click", () => bukaHitung(kode));
+  $("daftar-menu").appendChild(tombol);
+});
+function bukaHitung(kode) {
+  aktif = BANGUN[kode];
+  $("j-hitung").textContent = "Kalkulator " + aktif.nama.toLowerCase();
+  $("f-hitung").innerHTML = aktif.kolom.map(([id, label]) =>
+    `<div class="baris"><label for="h-${id}">${label}</label><input type="text" inputmode="decimal" id="h-${id}"></div>`).join("")
+    + (aktif.catatan ? `<p class="catatan">${aktif.catatan}</p>` : "");
+  reset(); tampil("hitung");
+}
+function reset() {
+  aktif.kolom.forEach(([id]) => $("h-" + id).value = "");
+  $("hasil").innerHTML = ""; $("s-hitung").textContent = "";
+}
+function hitung() {
+  const st = $("s-hitung"); st.textContent = ""; $("hasil").innerHTML = "";
+  const v = {};
+  for (const [id] of aktif.kolom) {
+    const n = Number($("h-" + id).value.trim().replace(",", "."));
+    if ($("h-" + id).value.trim() === "" || !Number.isFinite(n)) { st.textContent = "Masukkan angka yang valid!"; return; }
+    if (n <= 0) { st.textContent = "Nilai harus lebih dari 0!"; return; }
+    v[id] = n;
+  }
+  try {
+    $("hasil").innerHTML = aktif.hitung(v).map(([nama, nilai, satuan, kelas]) =>
+      `<p class="hasil ${kelas}">${nama}: ${fmt(nilai)} ${satuan}</p>`).join("");
+  } catch (e) { st.textContent = e.message; }
+}
+$("b-hitung").addEventListener("click", hitung);
+$("b-reset").addEventListener("click", reset);
+$("f-hitung").addEventListener("keydown", e => { if (e.key === "Enter") hitung(); });
+$("b-ke-menu").addEventListener("click", () => tampil("menu"));
+$("b-logout").addEventListener("click", () => { if (confirm("Yakin ingin logout?")) { userAktif = null; tampil("login"); } });
+</script>
+</body>
+</html>
