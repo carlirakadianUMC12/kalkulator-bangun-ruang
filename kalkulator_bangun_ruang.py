@@ -25,8 +25,7 @@ FONT_LABEL = ("Arial", 10)
 FONT_HASIL = ("Arial", 11, "bold")
 
 
-# data akun (disimpan ke file users.json di folder yang sama dengan aplikasi)
-# password TIDAK disimpan langsung, tapi dalam bentuk hash + salt (PBKDF2)
+
 def lokasi_file_users():
     if getattr(sys, "frozen", False):  # kalau dijalankan sebagai .exe
         folder = os.path.dirname(sys.executable)
@@ -123,7 +122,6 @@ def buat_tombol_aksi(parent, teks_hitung, fungsi_hitung, fungsi_reset):
               bd=0, cursor="hand2").pack(pady=(4, 10))
 
 
-# halaman login
 def buat_frame_login():
     frame = tk.Frame(container, bg=BG_UTAMA)
     frame.place(x=0, y=0, relwidth=1, relheight=1)
@@ -140,7 +138,7 @@ def buat_frame_login():
     entry_pass = buat_entry_baris(kartu, "Password:")
     entry_pass.config(show="*")
 
-    # checkbox lihat/sembunyikan password
+   
     tampil_pass = tk.BooleanVar(value=False)
 
     def toggle_password():
